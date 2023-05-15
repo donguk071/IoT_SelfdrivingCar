@@ -6,6 +6,13 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 
+PWMA = 18
+AIN1 = 22
+AIN2 = 27
+PWMB = 23
+BIN1 = 25
+BIN2 = 24
+
 def motor_back(speed):
      L_Motor.ChangeDutyCycle(speed)
      GPIO.output(AIN2,False)#AIN2
@@ -20,7 +27,6 @@ def motor_go(speed):
      R_Motor.ChangeDutyCycle(speed)
      GPIO.output(BIN2,True)#BIN2
      GPIO.output(BIN1,False) #BIN1
-
 def motor_stop():
      L_Motor.ChangeDutyCycle(0)
      GPIO.output(AIN2,False)#AIN2
@@ -53,9 +59,9 @@ GPIO.setup(BIN2,GPIO.OUT)
 GPIO.setup(PWMB,GPIO.OUT)
 L_Motor= GPIO.PWM(PWMA,100)
 L_Motor.start(0)
-
 R_Motor = GPIO.PWM(PWMB,100)
 R_Motor.start(0)
+
 speedSet = 40
 def img_preprocess(image):
      height, _, _ = image.shape
@@ -71,48 +77,46 @@ camera = cv2.VideoCapture(-1)
 camera.set(3, 640)
 camera.set(4, 480)
 
+
 def main():
-    model_path = "/home/사용자이름/AI_CAR/model/model1_20_epochs.h5"
+    model_path = "/home/사용자이름/AI_CAR/model/lane_navigation_final.h5"
     model = load_model(model_path)
     carState = 'stop'
     try:
-        while True:
-            keyValue = cv2.waitKey(1)
-            if keyValue == ord('q'):
-                break
-            elif keyValue == 82:
+          while True:
+               keyValue = cv2.waitKey(1)
+               if keyValue == ord('q'):
+                    break
+               elif keyValue == 82:
                     print("go")
                     carState = "go"
-            elif keyValue == 84:
+               elif keyValue == 84:
                     print("stop")
                     carState = 'stop'
                     
-            _, image = camera.read()
-            image = cv2.flip(image,-1)
-            preprocessed = img_preprocess(image)
-            cv2.imshow('pre', preprocessed)
-            X = np.asarray([preprocessed])
-            steering_angle = int(model.predict(X)[0])
-            print("predict angle:",steering_angle)
-            if carState == "go":
-                if steering_angle >= 70 and steering_angle <= 110:
-                    print("go")
-                    speedSet = 70
-                    motor_go(speedSet)
-                elif steering_angle > 111:
-                    print("right")
-                    speedSet = 40
-                    motor_right(speedSet)
-                elif steering_angle < 71:
-                    print("left")
-                    speedSet = 40
-                    motor_left(speedSet)
-                elif carState == "stop":
-                    motor_stop()
-                    
+                _, image = camera.read()
+                image = cv2.flip(image,-1)
+                preprocessed = img_preprocess(image)
+                cv2.imshow('pre', preprocessed)
+                X = np.asarray([preprocessed])
+                steering_angle = int(model.predict(X)[0])
+                print("predict angle:",steering_angle)
+                if carState == "go":
+                     if steering_angle >= 70 and steering_angle <= 110:
+                          print("go")
+                          motor_go(speedSet)
+                     elif steering_angle > 111:
+                          print("right")
+                          motor_right(speedSet)
+                     elif steering_angle < 71:
+                          print("left")
+                          motor_left(speedSet)
+                     elif carState == "stop":
+                          motor_stop()
+
     except KeyboardInterrupt:
-        pass
-    
+          pass
 if __name__ == '__main__':
-    main()
-    cv2.destroyAllWindows()
+     main()
+     cv2.destroyAllWindows()
+            
