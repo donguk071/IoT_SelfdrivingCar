@@ -15,54 +15,114 @@ BIN2 = 24
 
 def motor_back(speed):
      L_Motor.ChangeDutyCycle(speed)
-     GPIO.output(AIN2,False)#AIN2
-     GPIO.output(AIN1,True) #AIN1
+     GPIO.output(AIN2,False) #AIN2
+     GPIO.output(AIN1,True)  #AIN1
      R_Motor.ChangeDutyCycle(speed)
-     GPIO.output(BIN2,False)#BIN2
-     GPIO.output(BIN1,True) #BIN1
+     GPIO.output(BIN2,False) #BIN2
+     GPIO.output(BIN1,True)  #BIN1
+
 def motor_go(speed):
      L_Motor.ChangeDutyCycle(speed)
-     GPIO.output(AIN2,True)#AIN2
+     GPIO.output(AIN2,True)  #AIN2
      GPIO.output(AIN1,False) #AIN1
      R_Motor.ChangeDutyCycle(speed)
-     GPIO.output(BIN2,True)#BIN2
+     GPIO.output(BIN2,True)  #BIN2
      GPIO.output(BIN1,False) #BIN1
+
 def motor_stop():
      L_Motor.ChangeDutyCycle(0)
-     GPIO.output(AIN2,False)#AIN2
+     GPIO.output(AIN2,False) #AIN2
      GPIO.output(AIN1,False) #AIN1
      R_Motor.ChangeDutyCycle(0)
-     GPIO.output(BIN2,False)#BIN2
+     GPIO.output(BIN2,False) #BIN2
      GPIO.output(BIN1,False) #BIN1
-def motor_right(speed):
+
+def motor_right_30(left_speed, right_speed):
+     L_Motor.ChangeDutyCycle(left_speed)
+     GPIO.output(AIN2,True)  #AIN2
+     GPIO.output(AIN1,False) #AIN1
+     R_Motor.ChangeDutyCycle(right_speed)
+     GPIO.output(BIN2,True) #BIN2
+     GPIO.output(BIN1,False)  #BIN1
+
+def motor_right_60(left_speed, right_speed):
+     L_Motor.ChangeDutyCycle(left_speed)
+     GPIO.output(AIN2,True)  #AIN2
+     GPIO.output(AIN1,False) #AIN1
+     R_Motor.ChangeDutyCycle(right_speed)
+     GPIO.output(BIN2,True) #BIN2
+     GPIO.output(BIN1,False)  #BIN1
+
+def motor_right_90(speed):
      L_Motor.ChangeDutyCycle(speed)
-     GPIO.output(AIN2,True)#AIN2
+     GPIO.output(AIN2,True)  #AIN2
      GPIO.output(AIN1,False) #AIN1
      R_Motor.ChangeDutyCycle(0)
-     GPIO.output(BIN2,False)#BIN2
-     GPIO.output(BIN1,True) #BIN1
-def motor_left(speed):
+     GPIO.output(BIN2,True) #BIN2
+     GPIO.output(BIN1,False)  #BIN1
+     
+def motor_right_super(left_speed, right_speed):
+     L_Motor.ChangeDutyCycle(left_speed)
+     GPIO.output(AIN2,True)  #AIN2
+     GPIO.output(AIN1,False) #AIN1
+     R_Motor.ChangeDutyCycle(right_speed)
+     GPIO.output(BIN2,False) #BIN2
+     GPIO.output(BIN1,True)  #BIN1
+
+def motor_left_30(left_speed, right_speed):
+     L_Motor.ChangeDutyCycle(left_speed)
+     GPIO.output(AIN2,True)  #AIN2
+     GPIO.output(AIN1,False) #AIN1
+     R_Motor.ChangeDutyCycle(right_speed)
+     GPIO.output(BIN2,True) #BIN2
+     GPIO.output(BIN1,False)  #BIN1
+
+def motor_left_60(left_speed, right_speed):
+     L_Motor.ChangeDutyCycle(left_speed)
+     GPIO.output(AIN2,True)  #AIN2
+     GPIO.output(AIN1,False) #AIN1
+     R_Motor.ChangeDutyCycle(right_speed)
+     GPIO.output(BIN2,True) #BIN2
+     GPIO.output(BIN1,False)  #BIN1
+     
+def motor_left_90(speed):
      L_Motor.ChangeDutyCycle(0)
-     GPIO.output(AIN2,False)#AIN2
-     GPIO.output(AIN1,True) #AIN1
+     GPIO.output(AIN2,False) #AIN2
+     GPIO.output(AIN1,True)  #AIN1
      R_Motor.ChangeDutyCycle(speed)
-     GPIO.output(BIN2,True)#BIN2
+     GPIO.output(BIN2,True)  #BIN2
      GPIO.output(BIN1,False) #BIN1
+     
+def motor_left_super(left_speed, right_speed):
+     L_Motor.ChangeDutyCycle(left_speed)
+     GPIO.output(AIN2,False)  #AIN2
+     GPIO.output(AIN1,True) #AIN1
+     R_Motor.ChangeDutyCycle(right_speed)
+     GPIO.output(BIN2,True) #BIN2
+     GPIO.output(BIN1,False)  #BIN1
+
 
 GPIO.setwarnings(False) 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(AIN2,GPIO.OUT)
 GPIO.setup(AIN1,GPIO.OUT)
 GPIO.setup(PWMA,GPIO.OUT)
+
 GPIO.setup(BIN1,GPIO.OUT)
 GPIO.setup(BIN2,GPIO.OUT)
 GPIO.setup(PWMB,GPIO.OUT)
+
 L_Motor= GPIO.PWM(PWMA,100)
 L_Motor.start(0)
+
 R_Motor = GPIO.PWM(PWMB,100)
 R_Motor.start(0)
 
-speedSet = 40
+speedSet60 = 15
+speedSet30 = 30
+straightSpeedSet = 50
+powerSpeedSet = 80
+
 def img_preprocess(image):
      height, _, _ = image.shape
      image = image[int(height/2):,:,:]
@@ -101,18 +161,36 @@ def main():
                 X = np.asarray([preprocessed])
                 steering_angle = int(model.predict(X)[0])
                 print("predict angle:",steering_angle)
+                
+                # 0~ 6 사이 값이 나오는데....
+                
                 if carState == "go":
-                     if steering_angle >= 70 and steering_angle <= 110:
+                    #steering_angle 범위를 모르겠다
+                     if steering_angle == 0:
                           print("go")
-                          motor_go(speedSet)
-                     elif steering_angle > 111:
+                          motor_go(straightSpeedSet)
+                     elif steering_angle == 1:
                           print("right")
-                          motor_right(speedSet)
-                     elif steering_angle < 71:
+                          motor_right_30(straightSpeedSet, speedSet30)
+                     elif steering_angle == 2 :
                           print("left")
-                          motor_left(speedSet)
+                          motor_right_60(straightSpeedSet, speedSet60)
+                     elif steering_angle == 3:
+                          print("right")
+                          motor_right_90(straightSpeedSet)
+                     elif steering_angle == 4 :
+                          print("left")
+                          motor_left_30(straightSpeedSet, speedSet30)          
+                     elif steering_angle == 5 :
+                          print("left")
+                          motor_left_60(straightSpeedSet, speedSet60)         
+                     elif steering_angle == 6 :
+                          print("left")
+                          motor_left_90(straightSpeedSet)                  
                      elif carState == "stop":
                           motor_stop()
+
+#label_list =[0, 30, 60, 90, 120, 150, 180]
 
     except KeyboardInterrupt:
           pass
