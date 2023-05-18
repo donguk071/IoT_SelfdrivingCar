@@ -123,6 +123,7 @@ speedSet30 = 30
 straightSpeedSet = 50
 powerSpeedSet = 80
 
+
 def img_preprocess(image):
      height, _, _ = image.shape
      image = image[int(height/2):,:,:]
@@ -139,58 +140,69 @@ camera.set(4, 480)
 
 
 def main():
-    model_path = "/home/사용자이름/AI_CAR/model/lane_navigation_final.h5"
+    model_path = "/home/donguk/AI_CAR/model/lane_navigation_final.h5"
     model = load_model(model_path)
     carState = 'stop'
     try:
-          while True:
-               keyValue = cv2.waitKey(1)
-               if keyValue == ord('q'):
-                    break
-               elif keyValue == 82:
-                    print("go")
-                    carState = "go"
-               elif keyValue == 84:
-                    print("stop")
-                    carState = 'stop'
-                    
-                _, image = camera.read()
-                image = cv2.flip(image,-1)
-                preprocessed = img_preprocess(image)
-                cv2.imshow('pre', preprocessed)
-                X = np.asarray([preprocessed])
-                steering_angle = int(model.predict(X)[0])
-                print("predict angle:",steering_angle)
+        while True:
+            keyValue = cv2.waitKey(1)
+            if keyValue == ord('q'):
+                break
+            elif keyValue == 82:
+                print("go")
+                carState = "go"
+            elif keyValue == 84:
+                print("stop")
+                carState = 'stop'
                 
-                # 0~ 6 사이 값이 나오는데....
-                
-                if carState == "go":
-                    #steering_angle 범위를 모르겠다
-                     if steering_angle == 0:
-                          print("go")
-                          motor_go(straightSpeedSet)
-                     elif steering_angle == 1:
-                          print("right")
-                          motor_right_30(straightSpeedSet, speedSet30)
-                     elif steering_angle == 2 :
-                          print("left")
-                          motor_right_60(straightSpeedSet, speedSet60)
-                     elif steering_angle == 3:
-                          print("right")
-                          motor_right_90(straightSpeedSet)
-                     elif steering_angle == 4 :
-                          print("left")
-                          motor_left_30(straightSpeedSet, speedSet30)          
-                     elif steering_angle == 5 :
-                          print("left")
-                          motor_left_60(straightSpeedSet, speedSet60)         
-                     elif steering_angle == 6 :
-                          print("left")
-                          motor_left_90(straightSpeedSet)                  
-                     elif carState == "stop":
-                          motor_stop()
+            _ ,image = camera.read()
+            image = cv2.flip(image,-1)
+            preprocessed = img_preprocess(image)
+            cv2.imshow('pre', preprocessed)
+            X = np.asarray([preprocessed])
+            # steering_angle = int(model.predict(X)[0])
+            # print("predict angle:",steering_angle)
+            
+            predictions = model.predict(X)
+            max_probability_index = np.argmax(predictions, axis=1)
 
-#label_list =[0, 30, 60, 90, 120, 150, 180]
+            print("predicted class indices:", max_probability_index)
+            steering_angle = max_probability_index 
+            
+            # 0~ 6 사이 값이 나오는데....
+            
+            if carState == "go":
+                    if steering_angle == 0:
+                        print("go")
+                        motor_go(straightSpeedSet)
+                    elif steering_angle == 1:
+                        print("right")
+                        motor_right_30(straightSpeedSet, speedSet30)
+                    elif steering_angle == 2 :
+                        print("left")
+                        motor_right_60(straightSpeedSet, speedSet60)
+                    elif steering_angle == 3:
+                        print("right")
+                        motor_right_90(straightSpeedSet)
+                    elif steering_angle == 4 :
+                        print("left")
+                        motor_left_30(straightSpeedSet, speedSet30)          
+                    elif steering_angle == 5 :
+                        print("left")
+                        motor_left_60(straightSpeedSet, speedSet60)         
+                    elif steering_angle == 6 :
+                        print("left")
+                        motor_left_90(straightSpeedSet)        
+                    elif steering_angle == 7 :
+                        print("left")
+                        motor_left_super(speedSet30, straightSpeedSet)     
+                    elif steering_angle == 8 :
+                        print("left")
+                        motor_right_super(straightSpeedSet, speedSet30)               
+                    elif carState == "stop":
+                        motor_stop()
+
+        #label_list =[0, 30, 60, 90, 120, 150, 180]
 
     except KeyboardInterrupt:
           pass
