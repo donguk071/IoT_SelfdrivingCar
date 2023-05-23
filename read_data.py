@@ -72,10 +72,10 @@ class DataReader:
 
         # target 리스트에 저장된 값들의 분포 그래프 그리기
         
-test = DataReader()
-test.f_data_reader(200)
-plt.hist(test.target)
-plt.title("Distribution of Target Values")
-plt.xlabel("Target Values")
-plt.ylabel("Frequency")
-plt.show()
+# test = DataReader()
+# test.f_data_reader(200)
+# plt.hist(test.target)
+# plt.title("Distribution of Target Values")
+# plt.xlabel("Target Values")
+# plt.ylabel("Frequency")
+# plt.show()

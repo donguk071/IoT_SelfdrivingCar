@@ -21,7 +21,7 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.MaxPooling2D((2, 2)),
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(2000, activation=tf.nn.relu),
-    tf.keras.layers.Dense(7, activation=tf.nn.softmax)
+    tf.keras.layers.Dense(8, activation=tf.nn.softmax)
 ])
 
 # Compile the model
