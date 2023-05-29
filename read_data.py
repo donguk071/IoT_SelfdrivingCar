@@ -7,13 +7,16 @@ import re
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-label_list =[0, 30, 60, 90, 120, 150, 180, -30, 210]
+#label_list =[0, 30, 60, 90, 120, 150, 180, -30, 210]
+label_list =[0, 45, 90, 135, 180]
 
 def get_label_from_filename(filename):
     cvurrnet_label = re.findall(r'\d+', filename)[-1]  # 파일명에서 숫자 부분 추출
     for i,label in enumerate(label_list):
         if label == int(cvurrnet_label):
             return int(i)
+        # else:
+        #     print("dont have label", int(cvurrnet_label))
     return int(100)
 
 class DataReader:
@@ -25,7 +28,7 @@ class DataReader:
         
         self.target = []
         
-    def f_data_reader(self, img_size = 0):
+    def f_data_reader(self, img_size = (0,0), batch_size = 32):
         file_path = []
         folder = glob.glob('data/*')
         for f in folder:
@@ -36,8 +39,9 @@ class DataReader:
         data = []
         for i, path in enumerate(file_path):
             img = Image.open(path)
-            if img_size != 0 :
-                img_ref = img.resize((img_size, img_size))
+            if img_size[0] != 0 :
+                img_ref = img.resize((img_size[0], img_size[1]))
+                
             img = np.asarray(img_ref)
             label = get_label_from_filename(path)
             data.append((img, label))
@@ -71,6 +75,11 @@ class DataReader:
         print("Test Y Size : " + str(self.y_test.shape) + '\n\n')
 
         # target 리스트에 저장된 값들의 분포 그래프 그리기
+        plt.hist(target)
+        plt.title("Distribution of Target Values")
+        plt.xlabel("Target Values")
+        plt.ylabel("Frequency")
+        plt.show()
         
 # test = DataReader()
 # test.f_data_reader(200)
